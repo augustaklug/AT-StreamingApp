@@ -130,6 +130,31 @@ Portanto, o sistema está utilizando pelo menos dois Design Patterns.
 - **Regra 4**: Não deve haver mais de 3 transações em um intervalo de 2 minutos.
 - **Regra 5**: Não deve haver mais de 2 transações semelhantes (mesmo valor e comerciante) em um intervalo de 2 minutos.
 
+### Testes
+A aplicação possui testes foram escritos utilizando o JUnit e Mockito, cobrindo tanto as camadas de serviço quanto os controladores, para garantir a qualidade e confiabilidade do código.
+
+#### Tipos de Testes Implementados
+1. **Testes de Unidade**:
+   - **Serviços**: Testes para `AntifraudeService`, `AssinaturaService`, `TransacaoService`, e `UsuarioService`, garantindo que a lógica de negócios está correta e as regras antifraude são aplicadas conforme esperado.
+   - **Repositórios**: Testes para os repositórios `CartaoRepository`, `PlanoRepository`, `TransacaoRepository`, `UsuarioRepository`, e `MusicaRepository`, validando as operações de acesso a dados.
+
+2. **Testes de Integração**:
+   - **Controladores**: Testes para `PlaylistController`, `MusicaController`, `UsuarioController`, `TransacaoController`, e `AssinaturaController`, verificando se os endpoints estão funcionando corretamente e retornando as respostas esperadas.
+
+#### Ferramentas Utilizadas
+- **JUnit 5**: Framework de testes utilizado para escrever
+
+ e executar testes de unidade e integração.
+- **Mockito**: Utilizado para criação de mocks e simulação de comportamentos nos testes, permitindo testar componentes isolados.
+- **Spring Boot Test**: Facilita a configuração do contexto de aplicação para testes de integração, fornecendo utilitários para testes de controladores e serviços.
+
+#### Execução dos Testes
+Para executar todos os testes, utilize o comando:
+```sh
+./mvnw test
+```
+Os resultados dos testes serão exibidos no console, indicando o sucesso ou falha de cada caso de teste.
+
 ### Como Executar
 1. Clone o repositório.
 2. Navegue até o diretório do projeto.
