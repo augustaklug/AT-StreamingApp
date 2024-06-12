@@ -1,4 +1,4 @@
-package com.klug.streamingapp.usuarios.domain;
+package com.klug.streamingapp.usuarios.model;
 
 import jakarta.persistence.*;
 import lombok.Data;

@@ -1,7 +1,7 @@
 package com.klug.streamingapp.usuarios.dto;
 
 
-import com.klug.streamingapp.usuarios.domain.Usuario;
+import com.klug.streamingapp.usuarios.model.Usuario;
 import lombok.Data;
 
 import java.util.UUID;
@@ -22,6 +22,6 @@ public class UsuarioDTO {
         this.nome = usuario.getNome();
         this.email = usuario.getEmail();
         this.senha = usuario.getSenha();
-        this.cpf = usuario.getCpf();
+        this.cpf = String.valueOf(usuario.getCpf());
     }
 }

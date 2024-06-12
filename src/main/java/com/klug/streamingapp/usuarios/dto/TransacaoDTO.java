@@ -1,7 +1,7 @@
 package com.klug.streamingapp.usuarios.dto;
 
 
-import com.klug.streamingapp.usuarios.domain.Transacao;
+import com.klug.streamingapp.usuarios.model.Transacao;
 import lombok.Data;
 
 import java.time.LocalDateTime;

@@ -1,9 +1,9 @@
 package com.klug.streamingapp.usuarios.service;
 
 
-import com.klug.streamingapp.usuarios.domain.Assinatura;
-import com.klug.streamingapp.usuarios.domain.Plano;
-import com.klug.streamingapp.usuarios.domain.Usuario;
+import com.klug.streamingapp.usuarios.model.Assinatura;
+import com.klug.streamingapp.usuarios.model.Plano;
+import com.klug.streamingapp.usuarios.model.Usuario;
 import com.klug.streamingapp.usuarios.dto.AssinaturaDTO;
 import com.klug.streamingapp.usuarios.repository.PlanoRepository;
 import com.klug.streamingapp.usuarios.repository.UsuarioRepository;
@@ -24,6 +24,10 @@ public class AssinaturaService {
     public AssinaturaDTO criarAssinatura(AssinaturaDTO assinaturaDTO) throws Exception {
         Usuario usuario = usuarioRepository.findById(assinaturaDTO.getUsuarioId())
                 .orElseThrow(() -> new Exception("Usuário não encontrado"));
+
+        if (usuario.getAssinatura() != null && usuario.getAssinatura().isAtivo()) {
+            throw new Exception("Usuário já possui uma assinatura ativa.");
+        }
 
         Plano plano = planoRepository.findById(assinaturaDTO.getPlanoId())
                 .orElseThrow(() -> new Exception("Plano não encontrado"));

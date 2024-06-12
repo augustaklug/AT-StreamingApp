@@ -1,4 +1,4 @@
-package com.klug.streamingapp.conteudo.domain;
+package com.klug.streamingapp.conteudo.model;
 
 
 import jakarta.persistence.*;

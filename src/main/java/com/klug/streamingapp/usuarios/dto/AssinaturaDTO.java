@@ -1,7 +1,7 @@
 package com.klug.streamingapp.usuarios.dto;
 
 
-import com.klug.streamingapp.usuarios.domain.Assinatura;
+import com.klug.streamingapp.usuarios.model.Assinatura;
 import lombok.Data;
 
 import java.util.UUID;

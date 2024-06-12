@@ -1,6 +1,6 @@
 package com.klug.streamingapp.conteudo.repository;
 
-import com.klug.streamingapp.conteudo.domain.Musica;
+import com.klug.streamingapp.conteudo.model.Musica;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

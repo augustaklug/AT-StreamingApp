@@ -1,6 +1,6 @@
 package com.klug.streamingapp.usuarios.repository;
 
-import com.klug.streamingapp.usuarios.domain.Cartao;
+import com.klug.streamingapp.usuarios.model.Cartao;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
