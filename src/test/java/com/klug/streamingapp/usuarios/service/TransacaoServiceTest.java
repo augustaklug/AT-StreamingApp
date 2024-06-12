@@ -50,7 +50,7 @@ public class TransacaoServiceTest {
         cartao = new Cartao();
         cartao.setId(UUID.randomUUID());
         cartao.setAtivo(true);
-        cartao.setValidade(LocalDate.now().plusDays(1080)); // Cartão válido
+        cartao.setValidade(LocalDate.now().plusYears(2)); // Cartão válido
         cartao.setTransacoes(new ArrayList<>());
         cartao.setLimite(1000.0);
 
