@@ -158,10 +158,15 @@ Os resultados dos testes serão exibidos no console, indicando o sucesso ou falh
 ### Como Executar
 1. Clone o repositório.
 2. Navegue até o diretório do projeto.
-3. Execute o comando `./mvnw spring-boot:run`.
-4. Acesse a aplicação em `http://localhost:8080`.
+3. Execute o comando:
+```sh
+./mvnw spring-boot:run
+```
+5. Acesse a aplicação em `http://localhost:8080`.
 
 ### Conclusão
+- **Operações**: ✔️
+- **Regras de negócio**: ✔️
 - **Dois Design Patterns**: ✔️
 - **Context Mapping**: ✔️
 - **Aggregates e Aggregates Root**: ✔️
