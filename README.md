@@ -124,11 +124,168 @@ Portanto, o sistema está utilizando pelo menos dois Design Patterns.
 - `POST /api/v1/assinaturas/criar`: Cria uma nova assinatura para o usuário.
 
 ### Regras de Negócios Implementadas
-- **Regra 1**: O usuário pode ter somente um plano ativo.
-- **Regra 2**: O usuário deve ter um cartão de crédito válido.
-- **Regra 3**: Nenhuma transação deve ser aceita quando o cartão não está ativo.
-- **Regra 4**: Não deve haver mais de 3 transações em um intervalo de 2 minutos.
-- **Regra 5**: Não deve haver mais de 2 transações semelhantes (mesmo valor e comerciante) em um intervalo de 2 minutos.
+#### **Regra 1**: O usuário pode ter somente um plano ativo.
+  
+**Classe:** `AssinaturaService`
+
+**Método:** `criarAssinatura`
+
+No método `criarAssinatura` da classe `AssinaturaService`, há uma verificação para garantir que o usuário não tenha mais de um plano ativo:
+
+```java
+public AssinaturaDTO criarAssinatura(AssinaturaDTO assinaturaDTO) throws Exception {
+    Usuario usuario = usuarioRepository.findById(assinaturaDTO.getUsuarioId())
+            .orElseThrow(() -> new Exception("Usuário não encontrado"));
+
+    if (usuario.getAssinatura() != null && usuario.getAssinatura().isAtivo()) {
+        throw new Exception("Usuário já possui uma assinatura ativa.");
+    }
+
+    Plano plano = planoRepository.findById(assinaturaDTO.getPlanoId())
+            .orElseThrow(() -> new Exception("Plano não encontrado"));
+
+    Assinatura assinatura = new Assinatura();
+    assinatura.setPlano(plano);
+    assinatura.setDtAssinatura(LocalDateTime.now());
+    assinatura.setAtivo(true);
+    usuario.setAssinatura(assinatura);
+    usuarioRepository.save(usuario);
+
+    return new AssinaturaDTO(assinatura);
+}
+```
+
+Aqui, é verificado se o usuário já possui uma assinatura ativa (`usuario.getAssinatura().isAtivo()`), e uma exceção é lançada caso ele já tenha uma.
+  
+#### **Regra 2**: O usuário deve ter um cartão de crédito válido.
+  
+**Classe:** `Cartao`
+
+**Método:** `validarCartao`
+
+No método `validarCartao` da classe `Cartao`, a lógica de validação do cartão foi encapsulada no próprio modelo, garantindo que o cartão esteja ativo e válido:
+
+```java
+public void validarCartao() throws Exception {
+    if (!this.ativo || this.validade.isBefore(LocalDate.now())) {
+        throw new Exception("Cartão não é válido ou não está ativo.");
+    }
+}
+```
+
+**Classe:** `UsuarioService`
+
+**Método:** `criarConta`
+
+O método `criarConta` chama o método `validarCartao` do modelo `Cartao` para garantir que o cartão seja válido:
+
+```java
+public UsuarioDTO criarConta(UsuarioDTO usuarioDTO, UUID cartaoId, UUID planoId) throws Exception {
+    CPF cpf = new CPF(usuarioDTO.getCpf());
+    Usuario usuario = new Usuario(usuarioDTO.getNome(), usuarioDTO.getEmail(), passwordEncoder.encode(usuarioDTO.getSenha()), cpf);
+
+    Cartao cartao = cartaoRepository.findById(cartaoId).orElseThrow(() -> new Exception("Cartão não encontrado"));
+    Plano plano = planoRepository.findById(planoId).orElseThrow(() -> new Exception("Plano não encontrado"));
+
+    // Validar o cartão usando o método do próprio modelo
+    cartao.validarCartao();
+
+    usuario.getCartoes().add(cartao);
+    usuario.setAssinatura(new Assinatura(plano));
+
+    usuarioRepository.save(usuario);
+
+    playlistService.criarPlaylistDefault(usuario);
+
+    return new UsuarioDTO(usuario);
+}
+```
+  
+#### **Regra 3**: Nenhuma transação deve ser aceita quando o cartão não está ativo.
+  
+**Classe:** `Cartao`
+
+**Método:** `validarCartao`
+
+Esta regra é coberta pela mesma lógica de validação no método `validarCartao` da classe `Cartao`:
+
+```java
+public void validarCartao() throws Exception {
+    if (!this.ativo || this.validade.isBefore(LocalDate.now())) {
+        throw new Exception("Cartão não é válido ou não está ativo.");
+    }
+}
+```
+
+**Classe:** `TransacaoService`
+
+**Método:** `autorizarTransacao`
+
+No método `autorizarTransacao`, o método `validarCartao` é chamado dentro do método `criarTransacao` para garantir que o cartão está ativo antes de processar a transação:
+
+```java
+public TransacaoDTO autorizarTransacao(TransacaoDTO transacaoDTO) throws Exception {
+    Cartao cartao = cartaoRepository.findById(transacaoDTO.getCartaoId())
+            .orElseThrow(() -> new Exception("Cartão não encontrado"));
+
+    // Resto do código...
+
+    cartao.criarTransacao(transacaoDTO.getMerchant(), transacaoDTO.getValor(), transacaoDTO.getDescricao());
+
+    // Resto do código...
+}
+```
+  
+#### **Regra 4**: Não deve haver mais de 3 transações em um intervalo de 2 minutos.
+  **Classe:** `Cartao`
+
+**Método:** `validarTransacao`
+
+No método `validarTransacao` da classe `Cartao`, há uma verificação para garantir que não haja mais de 3 transações em um intervalo de 2 minutos:
+
+```java
+private boolean validarTransacao(Transacao transacao) {
+    List<Transacao> ultimasTransacoes = this.getTransacoes().stream()
+            .filter((x) -> x.getDtTransacao().isAfter(LocalDateTime.now().minusMinutes(this.TRANSACAO_INTERVALO_TEMPO)))
+            .toList();
+
+    if (ultimasTransacoes.size() >= this.TRANSACAO_QUANTIDADE_ALTA_FREQUENCIA)
+        return false;
+
+    // Resto do código...
+}
+```
+
+A lista `ultimasTransacoes` filtra transações ocorridas nos últimos 2 minutos, e o tamanho da lista é verificado para garantir que não exceda 3.
+  
+#### **Regra 5**: Não deve haver mais de 2 transações semelhantes (mesmo valor e comerciante) em um intervalo de 2 minutos.
+  
+**Classe:** `Cartao`
+
+**Método:** `validarTransacao`
+
+Ainda no método `validarTransacao` da classe `Cartao`, há uma verificação para garantir que não haja mais de 2 transações semelhantes em um intervalo de 2 minutos:
+
+```java
+private boolean validarTransacao(Transacao transacao) {
+    List<Transacao> ultimasTransacoes = this.getTransacoes().stream()
+            .filter((x) -> x.getDtTransacao().isAfter(LocalDateTime.now().minusMinutes(this.TRANSACAO_INTERVALO_TEMPO)))
+            .toList();
+
+    if (ultimasTransacoes.size() >= this.TRANSACAO_QUANTIDADE_ALTA_FREQUENCIA)
+        return false;
+
+    List<Transacao> transacoesMerchantRepetidas = ultimasTransacoes.stream()
+            .filter((x) -> x.getComerciante().equals(transacao.getComerciante())
+                    && x.getValor() == transacao.getValor())
+            .toList();
+
+    return transacoesMerchantRepetidas.size() < this.TRANSACAO_MERCHANT_DUPLICADAS;
+}
+```
+
+A lista `transacoesMerchantRepetidas` filtra transações nos últimos 2 minutos que possuem o mesmo comerciante e valor, garantindo que o tamanho da lista não exceda 2.
+  
 
 ### Testes
 A aplicação possui testes foram escritos utilizando o JUnit e Mockito, cobrindo tanto as camadas de serviço quanto os controladores, para garantir a qualidade e confiabilidade do código.
