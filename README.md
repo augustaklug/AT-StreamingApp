@@ -1,4 +1,4 @@
-## StreamingApp - Projeto de Streaming de Música
+## 🎵 StreamingApp - Projeto de Streaming de Música
 *AT da disciplina Design Patterns e Domain-Driven Design (DDD) com Java, da Gradução em Engenharia de Computação - Instituto INFNET*
 
 ### Visão Geral
