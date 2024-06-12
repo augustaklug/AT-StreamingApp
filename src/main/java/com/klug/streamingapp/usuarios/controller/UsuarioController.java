@@ -21,13 +21,7 @@ public class UsuarioController {
     @PostMapping("/criarConta")
     public ResponseEntity<UsuarioDTO> criarConta(@RequestBody UsuarioDTO usuarioDTO, @RequestParam UUID cartaoId, @RequestParam UUID planoId) {
         try {
-            Cartao cartao = new Cartao(); // Supondo que o cartão é criado na mesma requisição
-            cartao.setId(cartaoId);
-
-            Plano plano = new Plano(); // Supondo que o plano é criado na mesma requisição
-            plano.setId(planoId);
-
-            UsuarioDTO novoUsuario = usuarioService.criarConta(usuarioDTO, cartao, plano);
+            UsuarioDTO novoUsuario = usuarioService.criarConta(usuarioDTO, cartaoId, planoId);
             return ResponseEntity.ok(novoUsuario);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(null);

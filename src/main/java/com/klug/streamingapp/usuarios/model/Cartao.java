@@ -32,10 +32,7 @@ public class Cartao {
 
     public void criarTransacao(String merchant, double valor, String descricao) throws Exception {
 
-        //Validar Cartao
-        if (this.ativo == null || !this.ativo) {
-            throw new Exception("Cartão não está ativo");
-        }
+        validarCartao();
 
         Transacao transacao = new Transacao();
         transacao.setComerciante(merchant);
@@ -44,9 +41,7 @@ public class Cartao {
         transacao.setDtTransacao(LocalDateTime.now());
         transacao.setCartao(this);
 
-        if (!validarLimite(transacao)) {
-            throw new Exception("Cartão não possui limite para esta transação");
-        }
+        validarLimite(transacao);
 
         if (!validarTransacao(transacao)) {
             throw new Exception("Transação inválida");
@@ -57,36 +52,27 @@ public class Cartao {
         this.transacoes.add(transacao);
     }
 
+
+    public void validarCartao() throws Exception {
+        if (!this.ativo || this.validade.isBefore(LocalDate.now())) {
+            throw new Exception("Cartão não é válido ou não está ativo.");
+        }
+    }
+
+    private void validarLimite(Transacao transacao) throws Exception {
+        if (this.limite < transacao.getValor()) {
+            throw new Exception("Cartão não possui limite para esta transação");
+        }
+    }
+
     private boolean validarTransacao(Transacao transacao) {
-        List<Transacao> ultimasTransacoes = this.getTransacoes().stream()
-                .filter((x) -> x.getDtTransacao().isAfter(LocalDateTime.now().minusMinutes(this.TRANSACAO_INTERVALO_TEMPO)))
-                .toList();
+        List<Transacao> ultimasTransacoes = this.getTransacoes().stream().filter((x) -> x.getDtTransacao().isAfter(LocalDateTime.now().minusMinutes(this.TRANSACAO_INTERVALO_TEMPO))).toList();
 
-        if (ultimasTransacoes.size() >= this.TRANSACAO_QUANTIDADE_ALTA_FREQUENCIA)
-            return false;
+        if (ultimasTransacoes.size() >= this.TRANSACAO_QUANTIDADE_ALTA_FREQUENCIA) return false;
 
-        List<Transacao> transacoesMerchantRepetidas = ultimasTransacoes.stream()
-                .filter((x) -> x.getComerciante().equals(transacao.getComerciante())
-                        && x.getValor() == transacao.getValor())
-                .toList();
+        List<Transacao> transacoesMerchantRepetidas = ultimasTransacoes.stream().filter((x) -> x.getComerciante().equals(transacao.getComerciante()) && x.getValor() == transacao.getValor()).toList();
 
         return transacoesMerchantRepetidas.size() < this.TRANSACAO_MERCHANT_DUPLICADAS;
-    }
-
-    private boolean validarLimite(Transacao transacao) {
-        return this.limite > transacao.getValor();
-    }
-
-    public int getTransacaoIntervaloTempo() {
-        return TRANSACAO_INTERVALO_TEMPO;
-    }
-
-    public int getTransacaoQuantidadeAltaFrequencia() {
-        return TRANSACAO_QUANTIDADE_ALTA_FREQUENCIA;
-    }
-
-    public int getTransacaoMerchantDuplicadas() {
-        return TRANSACAO_MERCHANT_DUPLICADAS;
     }
 
 }
